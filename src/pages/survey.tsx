@@ -42,7 +42,7 @@ export default function Survey() {
     if (step >= 1 && step <= TOTAL_STEPS) {
       setCurrentStep(step);
     }
-  ;
+  };
 
   const validateCurrentStep = (): boolean => {
     switch (currentStep) {
