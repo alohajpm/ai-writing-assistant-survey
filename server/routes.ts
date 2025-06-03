@@ -2,7 +2,8 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { z } from "zod";
 import { storage } from "./storage";
-import { insertSurveyResponseSchema, surveyResponseUpdateSchema } from "@shared/schema";
+import { insertSurveyResponseSchema, surveyResponseUpdateSchema, surveyDataSchema } from "@shared/schema";
+import { aiService } from "./ai-service";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Get survey response by session ID
@@ -105,6 +106,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error exporting survey response:", error);
       res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // AI Preview endpoint
+  app.post("/api/ai/preview", async (req, res) => {
+    try {
+      const previewSchema = z.object({
+        content: z.string().min(1, "Content is required"),
+        surveyData: surveyDataSchema
+      });
+
+      const { content, surveyData } = previewSchema.parse(req.body);
+      
+      const preview = await aiService.generatePreview({ content, surveyData });
+      res.json(preview);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          message: "Validation error", 
+          errors: error.errors 
+        });
+      }
+      console.error("Error generating AI preview:", error);
+      res.status(500).json({ message: "Failed to generate preview" });
+    }
+  });
+
+  // Style Analysis endpoint
+  app.post("/api/ai/analyze-style", async (req, res) => {
+    try {
+      const styleSchema = z.object({
+        samples: z.array(z.object({
+          title: z.string(),
+          content: z.string()
+        })).min(1, "At least one writing sample is required")
+      });
+
+      const { samples } = styleSchema.parse(req.body);
+      
+      const analysis = await aiService.analyzeWritingStyle({ samples });
+      res.json(analysis);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          message: "Validation error", 
+          errors: error.errors 
+        });
+      }
+      console.error("Error analyzing writing style:", error);
+      res.status(500).json({ message: "Failed to analyze writing style" });
     }
   });
 
