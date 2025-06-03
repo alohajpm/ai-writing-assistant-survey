@@ -56,7 +56,13 @@ export const surveyDataSchema = z.object({
   }).default({}),
   industry: z.string().optional(),
   customInstructions: z.string().optional(),
-  audienceContext: z.string().optional()
+  audienceContext: z.string().optional(),
+  writingSamples: z.array(z.object({
+    id: z.string(),
+    title: z.string(),
+    content: z.string()
+  })).optional(),
+  styleAnalysis: z.string().optional()
 });
 
 export type SurveyData = z.infer<typeof surveyDataSchema>;
