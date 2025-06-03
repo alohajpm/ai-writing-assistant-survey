@@ -1,20 +1,6 @@
 {
-  "version": 2,
-  "buildCommand": "npm run build:client",
+  "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "functions": {
-    "api/**/*.ts": {
-      "runtime": "@vercel/node"
-    }
-  },
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/dist/$1"
-    }
-  ]
+  "installCommand": "npm install",
+  "framework": "vite"
 }
